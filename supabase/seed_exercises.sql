@@ -1,79 +1,60 @@
--- Gymkaana: Seed body parts and exercises
--- Run this once in Supabase SQL Editor to get the full exercise library.
--- If you already have body parts (e.g. "Arms"), this will ADD new ones.
+-- data:
+-- 1. Insert Body Parts
+INSERT INTO public.body_parts (name) VALUES 
+('Chest'), ('Back'), ('Legs'), ('Shoulders'), ('Arms'), ('Core'), ('Full Body');
 
--- 1. Insert body parts (skip if name exists)
-INSERT INTO public.body_parts (name)
-VALUES
-  ('Chest'),
-  ('Back'),
-  ('Legs'),
-  ('Shoulders'),
-  ('Biceps'),
-  ('Triceps'),
-  ('Core')
-ON CONFLICT (name) DO NOTHING;
+-- 2. Insert Common Exercises (Mapping to Body Parts)
+-- We use a sub-query to find the correct ID so this script is "copy-paste friendly"
+DO $$
+BEGIN
+    -- Chest
+    INSERT INTO public.exercises (name, body_part_id) VALUES 
+    ('Bench Press (Barbell)', (SELECT id FROM body_parts WHERE name = 'Chest')),
+    ('Incline Dumbbell Press', (SELECT id FROM body_parts WHERE name = 'Chest')),
+    ('Chest Fly (Cable/Dumbbell)', (SELECT id FROM body_parts WHERE name = 'Chest')),
+    ('Push-ups', (SELECT id FROM body_parts WHERE name = 'Chest'));
 
--- 2. Insert exercises (only if not already present)
-INSERT INTO public.exercises (name, body_part_id)
-SELECT v.ex_name, bp.id
-FROM (VALUES
-  ('Bench Press', 'Chest'),
-  ('Incline Bench Press', 'Chest'),
-  ('Decline Bench Press', 'Chest'),
-  ('Dumbbell Fly', 'Chest'),
-  ('Cable Crossover', 'Chest'),
-  ('Push Up', 'Chest'),
-  ('Chest Dip', 'Chest'),
-  ('Pec Deck Machine', 'Chest'),
-  ('Deadlift', 'Back'),
-  ('Barbell Row', 'Back'),
-  ('Pull Up', 'Back'),
-  ('Lat Pulldown', 'Back'),
-  ('Seated Cable Row', 'Back'),
-  ('T-Bar Row', 'Back'),
-  ('Single-Arm Dumbbell Row', 'Back'),
-  ('Face Pull', 'Back'),
-  ('Straight Arm Pulldown', 'Back'),
-  ('Squat', 'Legs'),
-  ('Front Squat', 'Legs'),
-  ('Leg Press', 'Legs'),
-  ('Leg Extension', 'Legs'),
-  ('Leg Curl', 'Legs'),
-  ('Romanian Deadlift', 'Legs'),
-  ('Lunges', 'Legs'),
-  ('Bulgarian Split Squat', 'Legs'),
-  ('Calf Raise', 'Legs'),
-  ('Hack Squat', 'Legs'),
-  ('Overhead Press', 'Shoulders'),
-  ('Dumbbell Shoulder Press', 'Shoulders'),
-  ('Lateral Raise', 'Shoulders'),
-  ('Front Raise', 'Shoulders'),
-  ('Rear Delt Fly', 'Shoulders'),
-  ('Arnold Press', 'Shoulders'),
-  ('Face Pull (Shoulders)', 'Shoulders'),
-  ('Barbell Curl', 'Biceps'),
-  ('Dumbbell Curl', 'Biceps'),
-  ('Hammer Curl', 'Biceps'),
-  ('Preacher Curl', 'Biceps'),
-  ('Cable Curl', 'Biceps'),
-  ('Concentration Curl', 'Biceps'),
-  ('Tricep Pushdown', 'Triceps'),
-  ('Skull Crusher', 'Triceps'),
-  ('Overhead Tricep Extension', 'Triceps'),
-  ('Close Grip Bench Press', 'Triceps'),
-  ('Tricep Dip', 'Triceps'),
-  ('Diamond Push Up', 'Triceps'),
-  ('Plank', 'Core'),
-  ('Crunch', 'Core'),
-  ('Leg Raise', 'Core'),
-  ('Cable Woodchop', 'Core'),
-  ('Russian Twist', 'Core'),
-  ('Ab Wheel Rollout', 'Core')
-) AS v(ex_name, part_name)
-JOIN public.body_parts bp ON bp.name = v.part_name
-WHERE NOT EXISTS (
-  SELECT 1 FROM public.exercises e
-  JOIN public.body_parts bpi ON e.body_part_id = bpi.id
-  WHERE e.name = v.ex_name AND bpi.name = v.part_name
-);
+    -- Back
+    INSERT INTO public.exercises (name, body_part_id) VALUES 
+    ('Lat Pulldown', (SELECT id FROM body_parts WHERE name = 'Back')),
+    ('Bent Over Row (Barbell)', (SELECT id FROM body_parts WHERE name = 'Back')),
+    ('Pull-ups', (SELECT id FROM body_parts WHERE name = 'Back')),
+    ('Seated Cable Row', (SELECT id FROM body_parts WHERE name = 'Back')),
+    ('Deadlift (Conventional)', (SELECT id FROM body_parts WHERE name = 'Back'));
+
+    -- Legs
+    INSERT INTO public.exercises (name, body_part_id) VALUES 
+    ('Back Squat (Barbell)', (SELECT id FROM body_parts WHERE name = 'Legs')),
+    ('Leg Press', (SELECT id FROM body_parts WHERE name = 'Legs')),
+    ('Leg Extension', (SELECT id FROM body_parts WHERE name = 'Legs')),
+    ('Lying Leg Curl', (SELECT id FROM body_parts WHERE name = 'Legs')),
+    ('Romanian Deadlift', (SELECT id FROM body_parts WHERE name = 'Legs')),
+    ('Bulgarian Split Squat', (SELECT id FROM body_parts WHERE name = 'Legs'));
+
+    -- Shoulders
+    INSERT INTO public.exercises (name, body_part_id) VALUES 
+    ('Overhead Press (Barbell)', (SELECT id FROM body_parts WHERE name = 'Shoulders')),
+    ('Lateral Raise (Dumbbell)', (SELECT id FROM body_parts WHERE name = 'Shoulders')),
+    ('Face Pulls', (SELECT id FROM body_parts WHERE name = 'Shoulders')),
+    ('Front Raise', (SELECT id FROM body_parts WHERE name = 'Shoulders'));
+
+    -- Arms
+    INSERT INTO public.exercises (name, body_part_id) VALUES 
+    ('Bicep Curl (Dumbbell)', (SELECT id FROM body_parts WHERE name = 'Arms')),
+    ('Hammer Curl', (SELECT id FROM body_parts WHERE name = 'Arms')),
+    ('Tricep Pushdown (Cable)', (SELECT id FROM body_parts WHERE name = 'Arms')),
+    ('Skull Crushers', (SELECT id FROM body_parts WHERE name = 'Arms'));
+
+    -- Core
+    INSERT INTO public.exercises (name, body_part_id) VALUES 
+    ('Plank Hover', (SELECT id FROM body_parts WHERE name = 'Core')),
+    ('Hanging Leg Raise', (SELECT id FROM body_parts WHERE name = 'Core')),
+    ('Russian Twist', (SELECT id FROM body_parts WHERE name = 'Core')),
+    ('Ab Wheel Rollout', (SELECT id FROM body_parts WHERE name = 'Core'));
+
+    -- 2026 Trends (Hybrid/Functional)
+    INSERT INTO public.exercises (name, body_part_id) VALUES 
+    ('Burpee Broad Jump', (SELECT id FROM body_parts WHERE name = 'Full Body')),
+    ('Sled Push/Pull', (SELECT id FROM body_parts WHERE name = 'Full Body')),
+    ('Kettlebell Swing', (SELECT id FROM body_parts WHERE name = 'Full Body'));
+END $$;
